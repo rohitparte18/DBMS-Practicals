@@ -1,0 +1,96 @@
+ubuntu@ubuntu-VMware-Virtual-Platform:~/Desktop$ sudo mysql
+[sudo] password for ubuntu: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 8.0.41-0ubuntu0.24.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| RohitParte         |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.01 sec)
+
+mysql> use database RohitParte;
+ERROR 1049 (42000): Unknown database 'database'
+mysql> use RohitParte;
+Database changed
+mysql> create table employee(ID int,Name varchar(30),Salary int,Department varchar(30));
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> insert into  employee values(101,"Akash",80000,"developer"),(201,"alisha",70000,"tester"),(111,"asish",90000,"developer"),(201,"alisha",70000,"tester"),(302,"akansha",60000,"manager");
+Query OK, 5 rows affected (0.02 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> select *
+    -> ;
+ERROR 1096 (HY000): No tables used
+mysql> select * from employee;
++------+---------+--------+------------+
+| ID   | Name    | Salary | Department |
++------+---------+--------+------------+
+|  101 | Akash   |  80000 | developer  |
+|  201 | alisha  |  70000 | tester     |
+|  111 | asish   |  90000 | developer  |
+|  201 | alisha  |  70000 | tester     |
+|  302 | akansha |  60000 | manager    |
++------+---------+--------+------------+
+5 rows in set (0.00 sec)
+
+mysql> create index sal on employee(Salary);
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> show index from employee;
++----------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+
+| Table    | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment | Index_comment | Visible | Expression |
++----------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+
+| employee |          1 | sal      |            1 | Salary      | A         |           4 |     NULL |   NULL | YES  | BTREE      |         |               | YES     | NULL       |
++----------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+
+1 row in set (0.00 sec)
+
+mysql> select * from employee where Salary=70000;
++------+--------+--------+------------+
+| ID   | Name   | Salary | Department |
++------+--------+--------+------------+
+|  201 | alisha |  70000 | tester     |
+|  201 | alisha |  70000 | tester     |
++------+--------+--------+------------+
+2 rows in set (0.00 sec)
+
+mysql> alter table employee drop index sal;
+Query OK, 0 rows affected (0.01 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> explain select * from employee where Salary=70000;
++----+-------------+----------+------------+------+---------------+------+---------+------+------+----------+-------------+
+| id | select_type | table    | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra       |
++----+-------------+----------+------------+------+---------------+------+---------+------+------+----------+-------------+
+|  1 | SIMPLE      | employee | NULL       | ALL  | NULL          | NULL | NULL    | NULL |    5 |    20.00 | Using where |
++----+-------------+----------+------------+------+---------------+------+---------+------+------+----------+-------------+
+1 row in set, 1 warning (0.01 sec)
+
+mysql> create index namexsalary on employee(Name,Salary);
+Query OK, 0 rows affected (0.02 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> explain select * from employee where Name="Alisha" AND Salary=70000;
++----+-------------+----------+------------+------+---------------+-------------+---------+-------------+------+----------+-------+
+| id | select_type | table    | partitions | type | possible_keys | key         | key_len | ref         | rows | filtered | Extra |
++----+-------------+----------+------------+------+---------------+-------------+---------+-------------+------+----------+-------+
+|  1 | SIMPLE      | employee | NULL       | ref  | namexsalary   | namexsalary | 128     | const,const |    2 |   100.00 | NULL  |
++----+-------------+----------+------------+------+---------------+-------------+---------+-------------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
